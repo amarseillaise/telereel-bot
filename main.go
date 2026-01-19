@@ -18,6 +18,7 @@ func main() {
 		log.Fatal(err)
 	}
 	b.Handle(telebot.OnText, bot.OnTextHandler)
+	b.Handle(telebot.OnQuery, bot.OnQueryHandler)
 
 	b.Start()
 }

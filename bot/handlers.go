@@ -1,7 +1,7 @@
 package bot
 
 import (
-	re "regexp"
+	"fmt"
 
 	"gopkg.in/telebot.v4"
 
@@ -9,10 +9,8 @@ import (
 )
 
 func OnTextHandler(c telebot.Context) error {
-	pattern := "\\.*instagram.com/reel\\.*/"
 	_url := c.Text()
-	is_valid_url, _ := re.MatchString(pattern, _url)
-	if is_valid_url {
+	if IsValidInstagramReelURL(_url) {
 		c.Notify(telebot.UploadingVideo)
 		shortcode := services.ParseShortcode(_url)
 		videoPath, captionPath, err := services.GetReelPath(shortcode)
@@ -24,6 +22,25 @@ func OnTextHandler(c telebot.Context) error {
 		} else {
 			return c.Reply("Error downloading reel")
 		}
+	}
+	return nil
+}
+
+func OnQueryHandler(c telebot.Context) error {
+	_url := c.Query().Text
+	fmt.Println(_url)
+	if IsValidInstagramReelURL(_url) {
+		vr := telebot.VideoResult{
+			URL:      "https://www.youtube.com/watch?v=wEc82Yq1uwo",
+			MIME:     "video/mp4",
+			ThumbURL: "https://upload.wikimedia.org/wikipedia/commons/f/f2/Felis_silvestris_silvestris_small_gradual_decrease_of_quality_-_JPEG_compression.jpg",
+			Title:    "YouTube Video",
+		}
+		rs := telebot.Results{&vr}
+		qr := &telebot.QueryResponse{
+			Results: rs,
+		}
+		return c.Answer(qr)
 	}
 	return nil
 }

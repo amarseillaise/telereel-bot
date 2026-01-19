@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	re "regexp"
 	"time"
 
 	tele "gopkg.in/telebot.v4"
@@ -66,4 +67,10 @@ func MakeCaption(captionPath string) string {
 		}
 	}
 	return captionContent
+}
+
+func IsValidInstagramReelURL(url string) bool {
+	pattern := "\\.*instagram.com/reel\\.*/"
+	is_valid, _ := re.MatchString(pattern, url)
+	return is_valid
 }

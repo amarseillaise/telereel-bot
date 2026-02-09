@@ -10,7 +10,7 @@ import (
 
 const ytdlp = "yt-dlp"
 
-func DownloadReel(shortcode string) error {
+func GetReel(shortcode string) error {
 	err := executeCMD(shortcode)
 	return err
 }

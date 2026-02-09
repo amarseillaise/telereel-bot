@@ -12,7 +12,6 @@ const (
 )
 
 func GetReelPath(shortcode string) (string, string, error) {
-	// TODO: make caching and try to read from cache first
 	videoPath, captionPath, err := downloadRemote(shortcode)
 	return videoPath, captionPath, err
 }

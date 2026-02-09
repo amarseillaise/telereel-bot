@@ -51,7 +51,7 @@ func initClient() *http.Client {
 }
 
 func MakeVideo(videoPath string) *tele.Video {
-	teleVideo := &tele.Video{File: tele.FromDisk(videoPath)}
+	teleVideo := &tele.Video{File: tele.FromDisk(videoPath)} /////////
 	return teleVideo
 }
 

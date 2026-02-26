@@ -13,14 +13,13 @@ func OnTextHandler(c telebot.Context) error {
 	if IsValidInstagramReelURL(_url) {
 		c.Notify(telebot.UploadingVideo)
 		shortcode := services.ParseShortcode(_url)
-		videoPath, captionPath, err := services.GetReelPath(shortcode)
+		videoUrl, caption, err := services.GetReelData(shortcode)
 		if err == nil {
-			teleVideo := MakeVideo(videoPath)
-			videoCaption := MakeCaption(captionPath)
-			teleVideo.Caption = videoCaption
+			teleVideo := MakeVideo(videoUrl)
+			teleVideo.Caption = caption
 			return c.Reply(teleVideo)
 		} else {
-			return c.Reply("Error downloading reel")
+			return c.Reply(err.Error())
 		}
 	}
 	return nil

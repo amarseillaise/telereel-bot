@@ -1,0 +1,92 @@
+package services
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+	"regexp"
+	"strings"
+)
+
+const (
+	reel_url = "https://www.instagram.com/reel/"
+)
+
+type ApiResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message,omitempty"`
+}
+
+func GetReelData(shortcode string) (videoUrl, caption string, err error) {
+	host_url := os.Getenv("FILE_SERVER_URL")
+	api_endpoint := fmt.Sprintf("%s/%s", host_url, shortcode)
+	resp, err := downloadRemote(api_endpoint)
+	if err != nil {
+		return "", "", err
+	}
+	defer resp.Body.Close()
+	videoUrl = GetReelVideoUrl(api_endpoint)
+	caption = GetReelCaption(api_endpoint)
+	appendSourceUrlToCaption(&caption, reel_url+shortcode)
+	cutCaptionIfNeed(&caption)
+	return videoUrl, caption, err
+}
+
+func downloadRemote(url_path string) (*http.Response, error) {
+	resp, err := http.Post(url_path, "", nil)
+	return resp, err
+}
+
+func GetReelVideoUrl(api_endpoint string) string {
+	videoUrl := fmt.Sprintf("%s/video.mp4", api_endpoint)
+	return videoUrl
+}
+
+func GetReelCaption(api_endpoint string) string {
+	methodUrl := fmt.Sprintf("%s/description", api_endpoint)
+	resp, err := http.Get(methodUrl)
+	if err != nil {
+		return ""
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return ""
+	}
+	captionData := make([]byte, resp.ContentLength)
+	_, err = resp.Body.Read(captionData)
+	if err != nil {
+		return ""
+	}
+	response := ApiResponse{}
+	err = json.Unmarshal(captionData, &response)
+	if err != nil || !response.Success {
+		return ""
+	}
+	return response.Message
+}
+
+func appendSourceUrlToCaption(caption *string, url string) {
+	if len(*caption) > 0 {
+		url += "\n\n"
+	}
+	*caption = url + *caption
+}
+
+func cutCaptionIfNeed(caption *string) {
+	if len(*caption) >= 1024 {
+		*caption = (*caption)[:1023]
+	}
+}
+
+func ParseShortcode(_url string) string {
+	pattern := "reel/.+/"
+	re := regexp.MustCompile(pattern)
+	match := re.FindString(_url)
+	if match == "" {
+		return ""
+	}
+	resultsSlice := strings.Split(match, "/")
+	shortcode := resultsSlice[1]
+	return shortcode
+}

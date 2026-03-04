@@ -1,8 +1,6 @@
 package bot
 
 import (
-	"fmt"
-
 	"gopkg.in/telebot.v4"
 
 	"github.com/amarseillaise/instareels_to_telegram/services"
@@ -13,10 +11,10 @@ func OnTextHandler(c telebot.Context) error {
 	if IsValidInstagramReelURL(_url) {
 		c.Notify(telebot.UploadingVideo)
 		shortcode := services.ParseShortcode(_url)
-		videoUrl, caption, err := services.GetReelData(shortcode)
+		reelData, err := services.GetReelData(shortcode)
 		if err == nil {
-			teleVideo := MakeVideo(videoUrl)
-			teleVideo.Caption = caption
+			teleVideo := MakeVideo(reelData.VideoUrl)
+			teleVideo.Caption = reelData.Caption
 			return c.Reply(teleVideo)
 		} else {
 			return c.Reply(err.Error())
@@ -27,13 +25,18 @@ func OnTextHandler(c telebot.Context) error {
 
 func OnQueryHandler(c telebot.Context) error {
 	_url := c.Query().Text
-	fmt.Println(_url)
 	if IsValidInstagramReelURL(_url) {
+		shortcode := services.ParseShortcode(_url)
+		reelData, err := services.GetReelData(shortcode)
+		if err != nil {
+			return nil
+		}
 		vr := telebot.VideoResult{
-			URL:      "https://www.youtube.com/watch?v=wEc82Yq1uwo",
+			URL:      reelData.VideoUrl,
+			Caption:  reelData.Caption,
 			MIME:     "video/mp4",
 			ThumbURL: "https://upload.wikimedia.org/wikipedia/commons/f/f2/Felis_silvestris_silvestris_small_gradual_decrease_of_quality_-_JPEG_compression.jpg",
-			Title:    "YouTube Video",
+			Title:    reelData.Title,
 		}
 		rs := telebot.Results{&vr}
 		qr := &telebot.QueryResponse{

@@ -18,19 +18,27 @@ type ApiResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
-func GetReelData(shortcode string) (videoUrl, caption string, err error) {
+type ReelData struct {
+	VideoUrl string
+	Caption  string
+	Title    string
+}
+
+func GetReelData(shortcode string) (ReelData, error) {
+	result := ReelData{}
 	host_url := os.Getenv("FILE_SERVER_URL")
 	api_endpoint := fmt.Sprintf("%s/%s", host_url, shortcode)
 	resp, err := downloadRemote(api_endpoint)
 	if err != nil {
-		return "", "", err
+		return result, err
 	}
 	defer resp.Body.Close()
-	videoUrl = GetReelVideoUrl(api_endpoint)
-	caption = GetReelCaption(api_endpoint)
-	appendSourceUrlToCaption(&caption, reel_url+shortcode)
-	cutCaptionIfNeed(&caption)
-	return videoUrl, caption, err
+	result.VideoUrl = getReelVideoUrl(api_endpoint)
+	result.Caption = getReelCaption(api_endpoint)
+	result.Title = cutTitleIfNeeded(result.Caption)
+	appendSourceUrlToCaption(&result.Caption, reel_url+shortcode)
+	cutCaptionIfNeed(&result.Caption)
+	return result, nil
 }
 
 func downloadRemote(url_path string) (*http.Response, error) {
@@ -38,12 +46,12 @@ func downloadRemote(url_path string) (*http.Response, error) {
 	return resp, err
 }
 
-func GetReelVideoUrl(api_endpoint string) string {
+func getReelVideoUrl(api_endpoint string) string {
 	videoUrl := fmt.Sprintf("%s/video.mp4", api_endpoint)
 	return videoUrl
 }
 
-func GetReelCaption(api_endpoint string) string {
+func getReelCaption(api_endpoint string) string {
 	methodUrl := fmt.Sprintf("%s/description", api_endpoint)
 	resp, err := http.Get(methodUrl)
 	if err != nil {
@@ -64,6 +72,14 @@ func GetReelCaption(api_endpoint string) string {
 		return ""
 	}
 	return response.Message
+}
+
+func cutTitleIfNeeded(caption string) string {
+	maxTitleLength := 100
+	if len(caption) > maxTitleLength {
+		return (caption)[:maxTitleLength] + "..."
+	}
+	return caption
 }
 
 func appendSourceUrlToCaption(caption *string, url string) {

@@ -32,8 +32,8 @@ go.work.sum
 .venv/
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
 
 # other
 requiremets.txt

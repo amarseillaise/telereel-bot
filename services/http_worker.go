@@ -26,15 +26,17 @@ type ReelData struct {
 
 func GetReelData(shortcode string) (ReelData, error) {
 	result := ReelData{}
-	host_url := os.Getenv("FILE_SERVER_URL")
-	api_endpoint := fmt.Sprintf("%s/%s", host_url, shortcode)
-	resp, err := downloadRemote(api_endpoint)
+	internal_url := os.Getenv("FILE_SERVER_URL")
+	internal_endpoint := fmt.Sprintf("%s/%s", internal_url, shortcode)
+	public_url := os.Getenv("PUBLIC_SERVER_URL")
+	public_endpoint := fmt.Sprintf("%s/%s", public_url, shortcode)
+	resp, err := downloadRemote(internal_endpoint)
 	if err != nil {
 		return result, err
 	}
 	defer resp.Body.Close()
-	result.VideoUrl = getReelVideoUrl(api_endpoint)
-	result.Caption = getReelCaption(api_endpoint)
+	result.VideoUrl = getReelVideoUrl(public_endpoint)
+	result.Caption = getReelCaption(internal_endpoint)
 	result.Title = cutTitleIfNeeded(result.Caption)
 	appendSourceUrlToCaption(&result.Caption, reel_url+shortcode)
 	cutCaptionIfNeed(&result.Caption)

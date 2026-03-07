@@ -35,7 +35,7 @@ func OnQueryHandler(c telebot.Context) error {
 			URL:      reelData.VideoUrl,
 			Caption:  reelData.Caption,
 			MIME:     "video/mp4",
-			ThumbURL: "https://upload.wikimedia.org/wikipedia/commons/f/f2/Felis_silvestris_silvestris_small_gradual_decrease_of_quality_-_JPEG_compression.jpg",
+			ThumbURL: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Instagram_logo_2022.svg/960px-Instagram_logo_2022.svg.png",
 			Title:    reelData.Title,
 		}
 		rs := telebot.Results{&vr}

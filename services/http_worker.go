@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"regexp"
@@ -63,8 +64,7 @@ func getReelCaption(api_endpoint string) string {
 	if resp.StatusCode != http.StatusOK {
 		return ""
 	}
-	captionData := make([]byte, resp.ContentLength)
-	_, err = resp.Body.Read(captionData)
+	captionData, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return ""
 	}
